@@ -17,9 +17,11 @@
 * Os usuários (Users) são pessoas da sua organização que podem ser agrupados. 
 * Cada um dos grupos (Groups) só pode conter usuários e não outros grupos.
 * Os usuários podem pertencer a múltiplos grupos ou até mesmo a nenhum grupo.
-* As políticas (Policies) são um documento json que contém as permissões (Permissions) de usuários ou grupos.
-* Alguns serviços da AWS precisam realizar ações e para é preciso incluir permissões com IAM Roles.
+* Alguns serviços da AWS precisam realizar ações a outros serviços da AWS e para isso é preciso incluir permissões com IAM Roles.
+* As políticas (Policies) são um documento json que definem as permissões (Permissions) para requisições de serviços na AWS e pode ser usado com ser usado por Users, Groups e Roles. O recomentado é garantir o mínimo de privelegios possivel.
+* Uma policy contém um id, uma versão e um ou mais statements (declarações).
+* Um Statement em uma IAM policy consiste em Sid (Um identificador), Effect (Allow ou Deny), Principal (account/user/role), Action (lista de ações sobre o recurso), Resource(lista de recursos que a ação será aplicada) e Condition (Condição para que a politica seja válida).
 * As boas práticas se segurança sugerem o uso de políticas de password (uso de senhas "fortes") e o uso de autenticação por multi fator (MFA).
 * Para acesso programático (CLI/SDK) deve utilizar uma chave de acesso (Access key) gerada e são análogas a uma senha.
-* IAM Credentials Report é um relatório que lista os usuários de sua conta e o status de suas credenciais, útil para auditoria.
+* IAM Credentials Report é uma ferramenta de segurança que gera um relatório que lista os usuários de sua conta e o status de suas credenciais, útil para auditoria.
 * IAM Access Advisor mostra as permissões de serviço concedidas a um usuário e quando esses serviços foram acessados pela última vez. É possivel usar essas informações para revisar suas políticas.

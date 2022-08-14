@@ -1,5 +1,5 @@
 # AWS Certified Developer Associate
-##AWS Regions
+## AWS Regions
 * A AWS tem regiões ao redor do mundo com nomes "us-east-1", "eu-west-3",...
 * Uma região é um cluster (conjunto) de data centers.
 * A maioria dos serviços tem escopo de região (region-scoped).

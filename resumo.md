@@ -25,3 +25,57 @@
 * Para acesso programático (CLI/SDK) deve utilizar uma chave de acesso (Access key) gerada e são análogas a uma senha.
 * IAM Credentials Report é uma ferramenta de segurança que gera um relatório que lista os usuários de sua conta e o status de suas credenciais, útil para auditoria.
 * IAM Access Advisor mostra as permissões de serviço concedidas a um usuário e quando esses serviços foram acessados pela última vez. É possivel usar essas informações para revisar suas políticas.
+## Elastic Compute Cloud (EC2)
+* Na representação da infraestrutura como um serviço, o EC2 se comporta como uma máquina virtual alugada.
+* É possivel definir o sistema operacional, a quantidade de CPU, RAM e o armazenamento, que pode ser conectado a rede (EBS/EFS) ou um hardware (EC2 Instance Store). Definir a rede (velocidade e Ip público), regras de firewall (security group) e um bootstrap script (EC2 User Data, comando de inicialização da máquina).
+* É possivel definir o bootstrap script através do EC2 User Data, que é comando que será executado pelo usuário root uma única vez na primeira inicialização. Normalmente contém solicitações de atualização, download de softwares, entre outras dependências.
+### Tipos de instâncias (EC2 Instance Types)
+* É possivel definir tipos diferentes de instancias otimizadas para atender casos especificos.
+* Segue a convenção "m5.2xlarge", sendo m= classe da instância, 5 = geração, 2xlarge = tamanho.
+#### Propósito Geral (General Purpose)
+* Ótimo para uma diversidade de cargas de trabalho, como servidores da Web ou repositórios de código
+* É balanceada entre memoria, cpu e rede.
+#### Computação otimizada (Compute Optimized)
+* Ótimo para tarefas de computação intensiva que exigem alto desempenho processadores.
+#### Memoria Otimizada (Memory Optimized)
+* Desempenho rápido para cargas de trabalho que processam grandes conjuntos de dados na memória.
+#### Armazenamento otimizado (Storage Optimized)
+* Ótimo para tarefas de armazenamento intensivo que exigem alta leitura e gravação sequencial acesso a grandes conjuntos de dados no armazenamento local.
+## Security Group
+* O Security Group representa um firewalll. Ele controla como o tráfego é permitido dentro ou fora de nossas instâncias do EC2.
+* O Security Group contêm apenas regras de permissão (allow rules). Podem ser referenciados por IP ou por um security group.
+* Eles regulam o acesso as portas, faixa de ips, controle de rede de entrada (inbound/de outra para a instancia) e de saida (outbound/da instancia para a saida).
+* Os security groups podem ser associados a multiplas instancias, restringido em uma combinação de região/VPC.
+* Todo o tráfego de entrada é bloqueado por padrão e todo o tráfego de saida é permetido por padrão.
+* Problemas de timeout, podem estar associados a um problema de security group. Problemas de connection refused, podem ser associados a um erro da aplicação ou a aplicação não foi iniciada.
+## EC2 Instances Purchasing Options
+### On-Demand Instances
+* Recomendado para cargas de trabalho de curto prazo e ininterruptas. 
+* Tem o custo mais alto, mas sem pagamento adiantado. O preço previsível e o pagamento é calculado por segundo.
+* Sem compromisso de longo prazo.
+### Instâncias reservadas (EC2 Reserved Instances)
+* É necessario reservar atributos de instância específicos (tipo de instância, região, locação, sistema operacional)
+* É preciso definir um período de reserva, que pode ser 1 ano ou 3 anos. Sendo quanto maior o tempo, maior o desconto.
+* As opções de pagamento são sem adiantamento, com adiantamento parcial e com adiantamento total. Sendo a mais barata a que o adiantamento é total e a mais cara sem o adiantamento.
+* O escopo da Instância Reservada pode ser Regional or Zonal (capacidade de reserva em uma AZ).
+* Recomendado para aplicações de uso em estado estacionário. Por exemplo, um banco de dados.
+* Existe uma variação um pouco mais cara, chamada **Convertible Reserved Instance**, ao qual é possivel mudar o tipo de instância, família de instâncias, sistema operacional, escopo e locação.
+### EC2 Savings Plans
+* Recebe um desconto com base no uso a longo prazo.
+* Restrito para uma família de instâncias específica e região da AWS, mas flexível para tamanho da instância, sistema operacional  e locação.
+### EC2 Spot Instances
+* O mais barato entre todos. (cost-efficient)
+* Instâncias que você pode “perder” a qualquer momento se seu preço máximo for menor que o preço spot atual.
+* Não deve ser usado para tarefas criticas.
+### EC2 Dedicated Hosts
+* Um servidor físico com capacidade de instância do EC2 totalmente dedicado ao seu uso.
+* Atende aos requisitos de compliance e permite vincular suas licenças de software ao servidor existentes.
+* É a opção mais cara entre todos os tipos.
+* Para opção de pagamento pode ser por On-Demand ou reservada (1 ou 3 anos).
+### EC2 Dedicated Instances
+* As instâncias são executadas em hardware que é dedicado à você.
+* Pode compartilhar hardware com outros instâncias na mesma conta.
+### EC2 Capacity Reservations
+* Serve para reservar a capacidade das instâncias sob demanda em uma AZ específica por qualquer duração.
+* Nenhum desconto é aplicado para este tipo.
+* Adequado para cargas de trabalho ininterruptas de curto prazo que precisam estar em um AZ específico.

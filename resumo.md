@@ -85,9 +85,25 @@
 * Eles só podem ser montados em uma instância por vez, mas uma instancia pode conter mais de um EBS.
 * Eles estão vinculados a uma zona de disponibilidade (AZ) específica.
 * É possível fazer um backup (snapshot) do EBS. Não é necessario, apesar de recomendado, desanexar o EBS para fazer o snapshot. É possivel copiar o snapshot para outro AZ ou região.
+* Por padrão, ao terminar uma instancia EC2 o tipo de root volume será excluído, pois seu atributo "Delete On Termination" é marcado por padrão. Quaisquer outros tipos de volume do EBS não serão excluídos, pois seu atributo "Delete On Termination" está desabilitado por padrão.
+### EBS Volume Types
+* gp2 / gp3 (SSD): Volume SSD de proposito geral que equilibra preço e desempenho para uma grande variedade de cargas de trabalho.
+* io1 / io2 (SSD): Volume SSD de mais alto desempenho para baixa latência ou cargas de trabalho de alto rendimento.
+* st1 (HDD): Volume de HDD de baixo custo projetado para cargas de trabalho de alta taxa de transferência acessadas com frequência.
+* sc1 (HDD): Volume de HDD de menor custo projetado para cargas de trabalho acessadas com menos frequência.
+* Somente gp2/gp3 and io1/io2 (os que são SSD) pode ser usado como "boot volumes".
+### EBS Multi-Attach – io1/io2 family
+* Anexe o mesmo volume EBS a várias instâncias do EC2 na mesma AZ.
+* Cada instância tem permissões leitura e gravação para o volume.
 ## EC2 Instance Storage
 *  EC2 Instance Store são discos de hardware de alto desempenho. Como o EBS tem uma boa performance, mas limitada. O instance storage atende cenarios em que é necessario esse alto desempenho.
 *  Melhor desempenho de I/O.
 *  Perdem o armazenamento se forem interrompidos, ou seja, existe o risco de perder dados se houver uma falha. São úteis para buffer, cache e outros conteúdos temporários.
+## Elastic File System (EFS)
+* NFS (network file system) gerenciado que pode ser montado em diversas instancias de EC2 em multi-AZ. Usa o protocolo NFSv4.1.
+* Altamente disponível, escalável, caro (3x gp2) e com pagamento por uso.
+* Usa o grupo de segurança para controlar o acesso ao EFS.
+* Compatível com AMI baseada em Linux (não Windows).
+* Criptografia em rest usando KMS.
 
-*  
+

@@ -79,3 +79,15 @@
 * Serve para reservar a capacidade das instâncias sob demanda em uma AZ específica por qualquer duração.
 * Nenhum desconto é aplicado para este tipo.
 * Adequado para cargas de trabalho ininterruptas de curto prazo que precisam estar em um AZ específico.
+## EBS Volume
+* Um volume EBS (Elastic Block Store) é uma drive de rede (não é um drive fisico) que você pode anexar para suas instâncias enquanto elas são executadas.
+* Permite que suas instâncias persistam dados, mesmo após o término. Funcionando analogamente como um disco.
+* Eles só podem ser montados em uma instância por vez, mas uma instancia pode conter mais de um EBS.
+* Eles estão vinculados a uma zona de disponibilidade (AZ) específica.
+* É possível fazer um backup (snapshot) do EBS. Não é necessario, apesar de recomendado, desanexar o EBS para fazer o snapshot. É possivel copiar o snapshot para outro AZ ou região.
+## EC2 Instance Storage
+*  EC2 Instance Store são discos de hardware de alto desempenho. Como o EBS tem uma boa performance, mas limitada. O instance storage atende cenarios em que é necessario esse alto desempenho.
+*  Melhor desempenho de I/O.
+*  Perdem o armazenamento se forem interrompidos, ou seja, existe o risco de perder dados se houver uma falha. São úteis para buffer, cache e outros conteúdos temporários.
+
+*  

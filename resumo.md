@@ -138,12 +138,36 @@
 * No geral, é recomendável usar os balanceadores de carga de geração mais recente, pois eles fornecem mais recursos.
 * Alguns balanceadores de carga podem ser configurados como internos (privados) ou externos (públicos).
 #### Classic Load Balancer (v1 - old generation) – 2009 – CLB
-* HTTP, HTTPS, TCP, SSL (secure TCP)
+* Suporta TCP (Layer 4), HTTP & HTTPS (Layer 7).
+* Health checks são baseados TCP ou HTTP.
+* Hostname fixo: XXX.region.elb.amazonaws.com.
 #### Application Load Balancer (v2 - new generation) – 2016 – ALB 
-* HTTP, HTTPS, WebSocket
+* Application load balancers é camada 7 (HTTP).
+* Balanceamento de carga para vários aplicativos em máquinas diferentes (target groups).
+* Balanceamento de carga para vários aplicativos na mesma máquina (ex: containers).
+* Suporte para HTTP/2 e WebSocket.
+* Suporte a redirecionamentos (de HTTP para HTTPS, por exemplo).
+* Encaminha tabelas para diferentes target groups. 
+  * Roteamento baseado no caminho na URL (example.com/users & example.com/posts). 
+  * Roteamento baseado no nome do host na URL (one.example.com & other.example.com).
+  * Roteamento baseado em Query String, Headers (example.com/users?id=123&order=false).
+  * O ALB é uma ótima opção para micro serviços e aplicativos baseados em contêiner (exemplo: Docker e Amazon ECS). Tem um recurso de mapeamento de porta para redirecionar para uma porta dinâmica no ECS.
+* Hostname Fixo: XXX.region.elb.amazonaws.com.
+* Os servidores de aplicativos não veem o IP do cliente diretamente, sendo que o Ip verdadeiro vem no header X-Forwarded-For. é possivel também obter a porta (X-Forwarded-Port) e o proto (X-Forwarded-Proto).
+##### Target Group
+* Instâncias do EC2 (podem ser gerenciadas por um Auto Scaling Group) – HTTP.
+* Tasks do ECS (gerenciadas pelo próprio ECS) – HTTP.
+* Para as funções Lambda a solicitação HTTP é traduzida em um evento JSON.
+* Endereços IP devem ser IPs privados.
+* ALB pode rotear para vários Target Groups.
+* As health checks estão no nível do Target Group.
 #### Network Load Balancer (v2 - new generation) – 2017 – NLB
-* TCP, TLS (secure TCP), UDP
+* Os balanceadores de carga de rede (camada 4) permitem encaminhe o tráfego TCP e UDP para suas instâncias, lidar com milhões de solicitações por segundo e tem menos latência ~ 100 ms (vs 400 ms para ALB).
+* O NLB tem um IP estático por AZ e oferece suporte à atribuição de IP elástico (útil para colocar IP específico na lista de permissões).
+* NLB are used for extreme performance, TCP or UDP traffic.
+* Os Target Groups podem ser instâncias EC2, endereços IP privados ou Application Load Balancer.
 #### Gateway Load Balancer – 2020 – GWLB
 * Opera na camada 3 (Network layer) – IP Protocol
+* Permite implantar, dimensionar e gerenciar um conjunto de dispositivos de rede virtuais de terceiros na AWS. Exemplos: Firewalls, Sistemas de detecção de Intrusão e de prevenção, Sistemas de inspeção profunda de pacotes, manipulação de carga, etc.
 * 
 

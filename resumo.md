@@ -105,5 +105,45 @@
 * Usa o grupo de segurança para controlar o acesso ao EFS.
 * Compatível com AMI baseada em Linux (não Windows).
 * Criptografia em rest usando KMS.
-
+## Escalabilidade
+* Escalabilidade significa que um aplicativo/sistema pode lidar com cargas maiores se adaptando. Existem dois tipos de escalabilidade: vertical e horizontal.
+### Escalabilidade vertical
+* Escalabilidade vertical significa aumentar o tamanho da instância. Por exemplo, um  aplicativo é executado em um "t2.micro", então executando-o em um t2.large, estaria sendo escalado verticalmente.
+* A escalabilidade vertical é muito comum para não sistemas distribuídos, como um banco de dados relacional.
+* Geralmente há um limite para o quanto você pode dimensionar verticalmente (limite de hardware).
+### Escalabilidade Horizontal
+* Escalabilidade Horizontal significa aumentar a número de instâncias/sistemas para uma aplicação.
+* A escala horizontal implica em sistemas distribuídos. Sendo muito comum para aplicações web/aplicativos modernos.
+## Alta disponibilidade
+* A Alta Disponibilidade geralmente "trabalha em conjunto" com a escala horizontal.
+* Alta disponibilidade significa executar o aplicativo/sistema em pelo menos 2 data centers (AZ). O objetivo da alta disponibilidade é sobreviver a uma perda de um dos data centers.
+* A alta disponibilidade pode ser passiva (RDS Multi AZ por exemplo) ou ativa (por escala horizontal).
+## Load Balances
+* Load Balances são servidores que encaminham tráfego para vários outros servidores (por exemplo, instâncias EC2).
+### Vantagens
+* Distribue a carga em várias instâncias. Portanto, lida com falhas de instâncias, criando alta disponibilidade entre zonas.
+* Expoem um único ponto de acesso (DNS) ao seu aplicativo.
+* Realiza verificações regulares de integridade de suas instâncias.
+* Fornece SSL (HTTPS) para seus sites.
+* Reforça a aderência com cookies.
+* Separa o tráfego público do tráfego privado.
+### Elastic Load Balancer
+* O Elastic Load Balancer é um balanceador de carga gerenciado, ou seja, a AWS garante que funcionará, sendo responsabilidade dela cuidar de atualizações, manutenção, alta disponibilidade, permitindo apenas a configuração pelo usuário.
+* É integrado a muitos serviços da AWS como EC2 Auto Scaling Groups, EC2, Amazon ECS, AWS Certificate Manager (ACM), CloudWatch, Route 53, AWS WAF, AWS Global Accelerator.
+### Health Checks
+* As verificações de integridade (Health Checks) são cruciais para balanceadores de carga. Eles permitem que o balanceador de carga saiba se as instâncias para as quais ele encaminha tráfego estão disponíveis para responder às solicitações.
+* A verificação de integridade é feita em uma porta e uma rota (/health, é a comum). Se a resposta não for 200 (OK), a instância não está íntegra.
+### Tipos de load balancer
+* Existem 4 tipos de load balancers.
+* No geral, é recomendável usar os balanceadores de carga de geração mais recente, pois eles fornecem mais recursos.
+* Alguns balanceadores de carga podem ser configurados como internos (privados) ou externos (públicos).
+#### Classic Load Balancer (v1 - old generation) – 2009 – CLB
+* HTTP, HTTPS, TCP, SSL (secure TCP)
+#### Application Load Balancer (v2 - new generation) – 2016 – ALB 
+* HTTP, HTTPS, WebSocket
+#### Network Load Balancer (v2 - new generation) – 2017 – NLB
+* TCP, TLS (secure TCP), UDP
+#### Gateway Load Balancer – 2020 – GWLB
+* Opera na camada 3 (Network layer) – IP Protocol
+* 
 

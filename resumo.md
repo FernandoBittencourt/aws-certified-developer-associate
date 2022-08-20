@@ -169,5 +169,46 @@
 #### Gateway Load Balancer – 2020 – GWLB
 * Opera na camada 3 (Network layer) – IP Protocol
 * Permite implantar, dimensionar e gerenciar um conjunto de dispositivos de rede virtuais de terceiros na AWS. Exemplos: Firewalls, Sistemas de detecção de Intrusão e de prevenção, Sistemas de inspeção profunda de pacotes, manipulação de carga, etc.
+* Combina as seguintes funcionalidades: Transparent Network Gateway (entrada/saída única para todo o tráfego) e  Load Balancer (distribui o tráfego para seus dispositivos virtuais).
+* Usa o protocolo GENEVE na porta 6081.
+### Sticky Sessions (Session Affinity)
+* É possível implementar a stickiness para que o mesmo cliente seja sempre redirecionado para a mesma instância por trás de um Load Balancer.
+* Isso funciona para Classic Load Balancers e para Application Load Balancers.
+* O "cookie" usado para aderência tem uma data de validade (expiration date) que você controla.
+* Caso de uso: garantir de que o usuário não perca seu dados da sessão.
+* Habilitar a stickiness pode trazer desequilíbrio de carga nas instâncias do EC2 de back-end, ou seja, muitas rqeuisições na mesma instancia, enquanto poucas em outras.
+#### Cookie Names
+* Application-based Cookies
+ * Custom cookie
+  * Gerado pelo target.
+  * Pode incluir quaisquer atributos personalizados exigidos pelo aplicativo.
+  * O nome do cookie deve ser especificado individualmente para cada target group.
+  * Não deve usar os nomes AWSALB, AWSALBAPP ou AWSALBTG, pois são reservados para uso pelo ELB.
+ * Application cookie
+  * Cookie gerado pelo load balancer.
+  * O nome do cookie é AWSALBAPP.
+* Duration-based Cookies
+ * Cookie gerado pelo load balancer.
+ * O nome do cookie é AWSALB para ALB e AWSELB para CLB.
+### Cross-Zone Load Balancing
+* Balanceamento de cargas entre AZ. Os nós do Load balancer distribuem solicitações de clientes para targets registrados. Quando o balanceamento de carga entre zonas (cross-zone load balancing) está habilitado, cada nó do balanceador de carga distribui o tráfego entre os todos targets registrados em todas as AZ habilitadas, ou seja a distruibuição passa a ser por instancia independente da AZ. Quando o balanceamento de carga entre zonas está desabilitado, cada nó do balanceador de carga distribui o tráfego apenas entre os targets em sua zona de disponibilidade, nesse caso a distruibuição passa a ser por AZ. 
+* Sempre ativo para o Application Load Balancer, não pode ser desabilitado e não gera cobranças  para dados entre AZ.
+* Desabilitado por padrão para o Network Load Balancer e *gera* cobranças para dados entre AZ, se habilitado.
+* Desabilitado por padrão para o Network Load Balancer e mas *não gera* cobranças para dados entre AZ, se habilitado.
+### SSL/TLS
+* Um certificado SSL permite o tráfego entre seus clientes e seu balanceador de carga a ser criptografado em trânsito (in-flight encryption).
+* SSL refere-se a Secure Sockets Layer, usado para criptografar conexões. TLS refere-se ao Transport Layer Security, que é uma versão mais recente. Os certificados TLS são mais usados, mas as pessoas ainda se referem a eles como SSL.
+* Os certificados SSL públicos são emitidos por Autoridades de Certificação (CA).
+* Os certificados SSL têm uma data de expiração (definida por você) e devem ser renovados.
+* Balanceador de carga usa um certificado X.509 (certificado de servidor SSL/TLS).
+* Você pode gerenciar certificados usando o ACM (AWS Certificate Manager) e você pode fazer upload de seus próprios certificados alternativamente.
+#### Server Name Indication (SNI)
+* O SNI resolve o problema de carregar vários certificados SSL em um servidor web (para atender a vários sites).
+* É um protocolo “mais recente” e exige que o cliente para indique o hostname do servidor de destino no handshake SSL inicial. O servidor irá então encontrar o certificado correto, ou retornar o default.
+* Só funciona para ALB e NLB (mais recentegeração) e para o CloudFront.
+### Connection Draining / Deregistration Delay
+* Connection Draining para CLB e Deregistration Delay para ALB e NLB.
+* É um tempo para completar “in-flight requests” enquanto o a instância está de-registering ou unhealthy. Ou seja, é um tempo para o servidor atender as requisições que foram feitas a ele, antes de se desregistrar.
+* Interrompe o envio de novas solicitações para o EC2 instância que está cancelando o registro.
+* Entre 1 a 3600 segundos (default: 300 segundos), pode ser desabilitado definindo o valor como 0. Recomendado definir um valor baixo se suas requisições forem curtas.
 * 
-

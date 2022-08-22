@@ -211,4 +211,28 @@
 * É um tempo para completar “in-flight requests” enquanto o a instância está de-registering ou unhealthy. Ou seja, é um tempo para o servidor atender as requisições que foram feitas a ele, antes de se desregistrar.
 * Interrompe o envio de novas solicitações para o EC2 instância que está cancelando o registro.
 * Entre 1 a 3600 segundos (default: 300 segundos), pode ser desabilitado definindo o valor como 0. Recomendado definir um valor baixo se suas requisições forem curtas.
-* 
+## Auto Scaling Group (ASG)
+* O objetivo de um Auto Scaling Group (ASG) é:
+ * Escalar horizontalmente, adicionando instâncias do EC2 para atender a uma carga maior e removendo instâncias do EC2 para atender a uma carga reduzida.
+ * Definir um número mínimo e máximo de instâncias do EC2 em execução.
+ * Regitrar automaticamente novas instâncias em um balanceador de carga.
+ * Recriar uma instância do EC2 caso uma anterior seja encerrada (ex: se não estiver íntegra).
+ * Boas métricas para escalar :
+   * CPUUtilization: CPU média utilização em suas instâncias.
+   * RequestCountPerTarget: para ter certeza se o número de solicitações por EC2 instâncias é estável.
+   * Average Network In / Out: Média de entrada/saída de rede (se você estiver aplicativo está vinculado à rede).
+   * Qualquer métrica personalizada que você envia usando o CloudWatch.
+### Auto Scaling - CloudWatch Alarms & Scaling
+* É possível dimensionar um ASG com base em alarmes do CloudWatch.
+* Um alarme monitora uma métrica (como CPU média ou uma métrica personalizada). Métricas como CPU média são calculadas para as instâncias do ASG.
+* Com base no alarme: Podemos criar políticas de expansão (aumentar o número de instâncias) e criar políticas de redução (diminuir o número de instâncias).
+#### Dynamic Scaling Policies
+* *Target Tracking Scaling*: Mais simples e fácil de configurar. Exemplo: Quero que a CPU média do ASG fique em torno de 40%.
+* *Simple / Step Scaling*: Regras como quando um alarme do CloudWatch é acionado (por exemplo, CPU > 70%), adicione 2 unidades. Quando um alarme do CloudWatch é acionado (por exemplo, CPU < 30%), remova 1.
+* *Scheduled Actions*: Antecipar um dimensionamento com base em padrões de uso conhecidos. Exemplo: aumentar a capacidade mínima para 10 às 17h às sextas-feiras.
+#### Predictive Scaling
+* Prever continuamente a carga e programar o escalonamento com antecedência.
+### Scaling Cooldowns
+* Depois que uma atividade de dimensionamento acontece, ocorre o período de espera (cooldown). Sendo que que o default é 300 segundos.
+* Durante o período de cooldown, o ASG não inicia instâncias adicionais ou encerra (para permitir que as métricas se estabilizem)
+* Conselho: Use uma AMI pronta para usar para reduzir o tempo de configuração e atender as requisições mais rápidos e reduzir o período de cooldown.

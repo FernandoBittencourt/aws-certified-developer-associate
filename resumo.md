@@ -236,3 +236,74 @@
 * Depois que uma atividade de dimensionamento acontece, ocorre o período de espera (cooldown). Sendo que que o default é 300 segundos.
 * Durante o período de cooldown, o ASG não inicia instâncias adicionais ou encerra (para permitir que as métricas se estabilizem)
 * Conselho: Use uma AMI pronta para usar para reduzir o tempo de configuração e atender as requisições mais rápidos e reduzir o período de cooldown.
+## Relational Database Service (RDS)
+* É um serviço de banco de dados gerenciado para banco de dados que usa SQL como linguagem de consulta.
+* Permite criar bancos de dados na nuvem gerenciados pela AWS e são eles: Postgres, MySQL, MariaDB, Oracle, Microsoft SQL Server e Aurora (banco de dados proprietário da AWS).
+* O RDS é um serviço gerenciado e ele fornece: 
+ * Provisionamento automatizado e patch de sistema operacional.
+ * Backups contínuos e restauração para um timestamp específico (Point in Time Restore).
+ * Painéis de monitoramento.
+ * Réplicas de leitura para melhor desempenho de leitura.
+ * Configuração Multi AZ para DR (Recuperação de Desastres/ Disaster Recovery).
+ * Janelas de manutenção para atualizações.
+ * Capacidade de dimensionamento (vertical e horizontal).
+ * Armazenamento suportado por EBS (gp2 ou io1).
+* Não é possível fazer SSH para as instâncias.
+### RDS Backups
+* Os backups são ativados automaticamente no RDS.
+* Backup Automatizado:
+ * Backup completo diário do banco de dados (durante a janela de manutenção).
+ * Os logs de transações são copiados pelo RDS a cada 5 minutos, capacidade de restaurar a qualquer momento (do backup mais antigo até 5 minutos atrás)
+ * Tem 7 dias de retenção (pode ser aumentado para 35 dias).
+* DB Snapshots:
+ * Acionado manualmente pelo usuário.
+ * Retenção de backup pelo tempo que o usuário quiser.
+### Storage Auto Scaling
+* Ajuda a aumentar o armazenamento de uma instância de banco de dados RDS dinamicamente.
+* Quando o RDS detecta que você está ficando sem banco de dados gratuito armazenamento, ele é dimensionado automaticamente.
+* Deve ser evitado dimensionar manualmente o armazenamento do banco de dados.
+* Você precisa definir o Maximum Storage Threshold (limite máximo para armazenamento de banco de dados).
+* Útil para aplicativos com cargas de trabalho imprevisíveis.
+* Suporta todos os mecanismos de banco de dados RDS (MariaDB, MySQL, PostgreSQL, SQL Server, Oracle).
+### RDS Read Replicas
+* Até 5 réplicas de leitura (Read Replicas).
+* Dentro da AZ, Cross AZ (Entre Az) ou Cross Region (Entre regiões).
+* A replicação é assincrona, então as leituras são eventualmente consistente (eventually consistent).
+* As réplicas podem ser promovidas a seu próprio banco de dados.
+* As réplicas de leitura são usadas para apenas para consultas (SELECT), ou seja, não deve modificar os dados (INSERT, UPDATE, DELETE).
+### Network Cost
+* Na AWS há um custo de rede quando os dados vão de uma AZ para outra.
+* Para RDS Read Replicas na mesma região, você não paga essa taxa.
+### RDS Multi AZ (Disaster Recovery)
+* A replicação é sincrona.
+* Um único nome DNS, ou seja, failover automático do aplicativo, o mesmo nome é usado em caso de falha.
+* Aumenta a disponibilidade, mas não é usado para escalabilidade.
+* Tolerancia a falhas (Failover) em caso de perda de AZ, de rede, instância ou armazenamento. Sem intervenção manual em aplicativos.
+* As Réplicas de Leitura devem ser configuradas como Multi AZ para recuperação de desastres (DR). A replicação Multi-AZ é gratuita.
+#### De Single-AZ para Multi-AZ
+* Zero downtime operation (não precisa parar o DB), basta clicar em modify.
+* O seguinte acontece internamente: Uma snapshot é gerada, Um novo banco de dados é restaurado da snapshot em uma nova AZ e a sincronização é estabelecida entre os dois bancos de dados.
+### RDS Security
+* Criptografia em REST:
+ * Possibilidade de criptografar o master e as read replicas com AWS KMS, criptografia em AES-256. Sendo que A criptografia deve ser definida no momento do lançamento.
+ * Se o master não estiver criptografado, as réplicas de leitura não podem ser criptografadas.
+ * Transparent Data Encryption (TDE) disponível para Oracle e SQL Server.
+* In-flight encryption:
+ * Certificados SSL para criptografar dados para RDS em trânsito.
+ * Fornece opções de SSL com certificado de confiança ao se conectar ao banco de dados.
+ #### Network Security
+ * Os bancos de dados RDS geralmente são implantados em uma sub-rede privada, não em uma pública.
+ * A segurança do RDS funciona aproveitando security groups (o mesmo conceito do EC2), controlando qual IP ou security group pode se comunicar com o RDS.
+ #### Access Management
+ * As políticas do IAM ajudam a controlar quem pode gerenciar o AWS RDS (por meio da API do RDS).
+ * Nome de usuário e senha tradicionais podem ser usados para fazer login no banco de dados.
+ * A autenticação baseada em IAM pode ser usada para fazer login no RDS MySQL e PostgreSQL.
+ ## Amazon Aurora
+ * Aurora é uma tecnologia proprietária da AWS (não de código aberto).
+ * Postgres e MySQL são suportados como Aurora DB (isso significa que seu drivers funcionarão como se o Aurora fosse um banco de dados Postgres ou MySQL).
+ * O Aurora é “otimizado para a nuvem da AWS” e reivindica uma melhoria de desempenho de 5x sobre MySQL no RDS, mais de 3x o desempenho do Postgres no RDS.
+ * O armazenamento Aurora cresce automaticamente em incrementos de 10 GB, até 128 TB.
+ * O Aurora pode ter 15 réplicas enquanto o MySQL tem 5 e o processo de replicação é mais rápido (atraso de réplica de menos de 10 ms).
+ * O failover no Aurora é instantâneo, ou seja, a alta disponibilidade é nativa.
+ * Aurora custa mais que RDS (20% a mais), mas é mais eficiente.
+ 

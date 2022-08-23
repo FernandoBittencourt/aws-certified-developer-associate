@@ -306,4 +306,62 @@
  * O Aurora pode ter 15 réplicas enquanto o MySQL tem 5 e o processo de replicação é mais rápido (atraso de réplica de menos de 10 ms).
  * O failover no Aurora é instantâneo, ou seja, a alta disponibilidade é nativa.
  * Aurora custa mais que RDS (20% a mais), mas é mais eficiente.
+ ## ElastiCache
+ * Da mesma forma que o RDS é para obter bancos de dados relacionais gerenciados, ElastiCache é obter Redis ou Memcached gerenciado.
+ * Caches são bancos de dados na memória com desempenho realmente alto e baixa latência.
+ * Ajuda a reduzir a carga de bancos de dados para cargas de trabalho de leitura intensa.
+ * Ajuda a tornar a aplicação *stateless*.
+ * A AWS cuida da manutenção/aplicação de patches do sistema operacional, otimizações, configuração, monitoramento, recuperação de falhas e backups.
+ * O uso do ElastiCache envolve mudanças pesadas no código do aplicativo.
+ * Em relação ao uso como cache a consultas de banco de dados por aplicações, se não disponível no ElastiCache, obter de RDS e armazenar no ElastiCache. O cache deve ter uma estratégia de invalidação para certificar que apenas os dados mais atuais sejam obtidos de lá.
+ * Em relação ao uso como sessão de usuário, o usuário faz login em qualquer uma das aplicações e a aplicação grava os dados da sessão no ElastiCache. Se a requisição chegar em outra instância da aplicação, a instância recupera os dados e o usuário continua logado nela.
+ ### Redis
+ * Multi-AZ com Failover Automático.
+ * Replicas de leitura com objetivo de escalar a leitura e prover a alta disponibilidade.
+ * Durabilidade dos dados usando AOF persistência.
+ * Recursos de backup e restauração.
+ ### Memcached
+ * Multi-node para particionamento dedados (sharding).
+ * Sem alta disponibilidade (replicação).
+ * Sem persistência.
+ * Sem recursos de backup e restauração.
+ * Multi-threaded architecture.
+### ElastiCache – Cache Security
+* Não suporta autenticação do IAM
+* As políticas do IAM no ElastiCache são usadas apenas para segurança no nível da API da AWS.
+* Redis AUTH
+ * É possivel definir uma “senha/token” quando criar um cluster Redis.
+ * Este é um nível extra de segurança para seu cache (em cima dos grupos de segurança).
+ * Suporte a criptografia SSL.
+* Memcached
+ * Suporta autenticação baseada em SASL (avançada).
+### ElastiCache Replication
+#### Cluster Mode Disabled
+* Um nó primário e até 5 réplicas.
+* Replicação assincrona.
+* O nó primário é usado para leitura/gravação e os outros nós são somente leitura.
+* Um shard, todos os nós têm todos os dados.
+* Proteje contra perda de dados em caso de falha do nó.
+* Multi-AZ habilitado por padrão para failover.
+* Útil para escalar o desempenho de leitura.
+#### Cluster Mode Enabled
+* Os dados são particionados em shards (útil para escalar gravações).
+* Cada fragmento tem um primário e até 5 nós de réplica (mesmo conceito de antes).
+* Capacidade multi-AZ.
+### Design patters de cache
+* Lazy Loading / Cache-Aside / Lazy Population (Só atualiza o cache na consulta)
+ * Prós
+  * Apenas os dados solicitados são em cache (o cache não está preenchido com dados não utilizados).
+  * Falhas de nós não são fatais (apenas aumento da latência para aquecer a cache).
+ * Contras
+  * Penalidade de falta de cache que resulta em 3 viagens de ida e volta, atraso perceptível para essa solicitação.
+  * Dados obsoletos: os dados podem ser atualizados no banco de dados e desatualizado no cache.
+* Write Through (Adicionar ou atualizar o cache quando o banco de dados for atualizado)
+ * Prós
+  * Os dados em cache nunca são obsoleto, as leituras são rápidas.
+  * Penalidade de gravação vs leitura penalidade (cada gravação requer 2 chamadas)
+ * Contras
+  * Dados ausentes até que sejam adicionados/atualizados no banco de dados. A mitigação é implementar a estratégia Lazy Loading também.
+  * Cache churn, muitos dos dados nunca serão lidos.
+
  

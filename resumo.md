@@ -349,19 +349,23 @@
 * Cada fragmento tem um primário e até 5 nós de réplica (mesmo conceito de antes).
 * Capacidade multi-AZ.
 ### Design patters de cache
-* Lazy Loading / Cache-Aside / Lazy Population (Só atualiza o cache na consulta)
+* *Lazy Loading / Cache-Aside / Lazy Population* (Só atualiza o cache na consulta)
  * Prós
   * Apenas os dados solicitados são em cache (o cache não está preenchido com dados não utilizados).
   * Falhas de nós não são fatais (apenas aumento da latência para aquecer a cache).
  * Contras
   * Penalidade de falta de cache que resulta em 3 viagens de ida e volta, atraso perceptível para essa solicitação.
   * Dados obsoletos: os dados podem ser atualizados no banco de dados e desatualizado no cache.
-* Write Through (Adicionar ou atualizar o cache quando o banco de dados for atualizado)
+* *Write Through* (Adicionar ou atualizar o cache quando o banco de dados for atualizado)
  * Prós
   * Os dados em cache nunca são obsoleto, as leituras são rápidas.
   * Penalidade de gravação vs leitura penalidade (cada gravação requer 2 chamadas)
  * Contras
   * Dados ausentes até que sejam adicionados/atualizados no banco de dados. A mitigação é implementar a estratégia Lazy Loading também.
   * Cache churn, muitos dos dados nunca serão lidos.
-
- 
+### Cache Evictions and Time-to-live (TTL)
+* O *Cache eviction* (despejo de cache) pode ocorrer de três maneiras:
+ * Você exclui o item explicitamente no cache.
+ * O item é despejado porque a memória está cheia e não foi usada recentemente (LRU).
+ * Você define o time-to-live (Tempo de vida)de um item (ou TTL).
+* Se ocorrerem muitos despejos devido à memória, você deve aumentar ou diminuir a escala

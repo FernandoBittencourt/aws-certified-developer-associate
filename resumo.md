@@ -367,5 +367,156 @@
 * O *Cache eviction* (despejo de cache) pode ocorrer de três maneiras:
  * Você exclui o item explicitamente no cache.
  * O item é despejado porque a memória está cheia e não foi usada recentemente (LRU).
- * Você define o time-to-live (Tempo de vida)de um item (ou TTL).
+ * Você define o time-to-live (Tempo de vida) de um item (ou TTL).
 * Se ocorrerem muitos despejos devido à memória, você deve aumentar ou diminuir a escala
+## DNS (Domain Name System)
+* O DNS é responsável por traduzir um hostname amigavel a um ser humano para um endereço de ip. Por exemplo, www.google.com para 172.217.18.36.
+* O DNS é o backbone da internet e utiliza uma estrutura hierarquica de nomes.
+### DNS Terminologies
+* Domain Registrar: Amazon Route 53, GoDaddy, …
+* DNS Records: A, AAAA, CNAME, NS, …
+* Zone File: contém registros do DNS.
+* Name Server: resolve consultas ao DNS (Authoritative or Non-Authoritative).
+* Top Level Domain (TLD): .com, .us, .in, .gov, .org, …
+* Second Level Domain (SLD): amazon.com, google.com, …
+## Amazon Route 53
+* Um DNS altamente disponível, escalável, totalmente gerenciado e authoritative (ou seja, o cliente pode atualizar os registros do DNS).
+* Route 53 é também um Domain Registrar.
+* Capacidade de verificar a integridade (health checks) de seus recursos.
+* O único serviço da AWS com 100% de SLA de disponibilidade.
+* 53 é uma referência a tradicional porta do DNS.
+### Records
+* Como você deseja rotear o tráfego para um domínio.
+* Cada registro (record) contém:
+ * Domain/subdomain Name: Por exemplo, example.com
+ * Record Type: Por exemplo, A ou AAAA.
+ * Value: Por exemplo, 12.34.56.78.
+ * Routing Policy: Como Route 53 responde as consultas.
+ * TTL: A quantidade de tempo que o registro é "cacheado" no DNS Resolvers.
+* O Route 53 oferece suporte aos seguintes tipos de registro DNS:
+ * A / AAAA / CNAME / NS (necessario saber para a certificação).
+ * CAA / DS / MX / NAPTR / PTR / SOA / TXT / SPF / SRV (avançados).
+### Record Types
+* A: Mapeia um hostname para um IPv4.
+* AAAA: Mapeia um hostname para um IPv6.
+* CNAME: Mapeia um hostname para outro hostname.
+ * O destino é um nome de domínio que deve ter um registro A ou AAAA.
+ * Não é possível criar um registro CNAME para o nó superior (top node) de um namespace DNS (Zone Apex). Por xemplo, não é possivel criar para example.com, mas é possivel para www.example.com.
+* NS – Name Servers para uma Hosted Zone.
+ * Controla como o tráfego é roteado para um domínio.
+### Hosted Zones
+* Um contêiner para registros que definem como rotear o tráfego para um domínio e seus subdomínios.
+ * Public Hosted Zones: contém registros que especificam como rotear o tráfego na Internet (public domain names). Por exemplo, application1.mypublicdomain.com.
+ * Private Hosted Zones: contêm registros que especificam como você roteia o tráfego em uma ou mais VPCs (private domain names). Por exemplo, application1.company.internal.
+* Você paga US$ 0,50 por mês por zona hospedada.
+### Records TTL (Time To Live)
+* Tempo de vida alto (High TTL): Menos trafego no Route 53, mas existe a possibilidade de ter registro desatualizados. Por exemplo, tempo de 24 horas.
+* Tempo de vida baixo (Low TTL): Mais trafego no Route 53(ficando mais caro), mas os registros desatualizados ficam por menos tempo. Por exemplo, 60 segundos.
+* Exceto para Alias records, TTL é obrigatório para cada registro DNS,
+### Alias Records
+* Mapeia um hostname para um recurso da AWS. Sendo uma extensão para a funcionalidade DNS. 
+* Reconhece automaticamente as alterações nos endereços de IP do recurso da AWS.
+* Ao contrário do CNAME, ele pode ser usado para o nó superior de um namespace DNS (Zone Apex), por exemplo, example.com.
+* O alias record é sempre do tipo A/AAAA para recursos da AWS (IPv4/IPv6).
+* Não é possivel adicionar um TTL.
+* Alias Records Targets:
+ * Elastic Load Balancers.
+ * CloudFront Distributions.
+ * API Gateway.
+ * Elastic Beanstalk environments.
+ * S3 Websites.
+ * VPC Interface Endpoints.
+ * Global Accelerator accelerator.
+ * Route 53 record na mesma hosted zone.
+ * Não é possivel definir um ALIAS record para um nome DNS do EC2.
+### CNAME vs Alias
+* Um cenario comum é que os recursos da AWS (Load Balancer, CloudFront...) expoem um hostname da AWS, por exemplo, um hostname exposto é o "lb1-1234.us-east-2.elb.amazonaws.com", mas o desejado é, por exemplo, o "myapp.mydomain.com".
+* CNAME: Aponta um hostname para outro hostname. (app.mydomain.com => blabla.anything.com). Somente para NON ROOT DOMAIN (something.mydomain.com).
+* Alias: Aponta um hostname para um recurso da AWS (app.mydomain.com => blabla.amazonaws.com).Funciona para ROOT DOMAIN and NON ROOT DOMAIN (mydomain.com). Tem health check nativo e de graça.
+### Routing Policies
+* Define como o Route 53 responde às consultas DNS.
+* Não se confunda a palavra "Routing", não é o mesmo que o roteamento do balanceador de carga que roteia o tráfego. O DNS não roteia nenhum tráfego, apenas responde às consultas de DNS.
+* O Route 53 é compatível com o seguinte Routing Policies:
+ * Simple
+ * Weighted
+ * Failover
+ * Latency based
+ * Geolocation
+ * Multi-Value Answer
+ * Geoproximity
+#### Routing Policies – Simple
+* Normalmente, roteia o tráfego para um único recurso.
+* Pode especificar vários valores no mesmo registro. Se vários valores forem retornados, um valor aleatório é escolhido pelo cliente.
+* Quando o Alias estiver habilitado, será especificado apenas um unico recurso da AWS.
+* Não pode ser associado com  Health Checks.
+#### Routing Policies – Weighted
+* Controle a porcentagem das solicitações que vão para cada recurso específico.
+* Atribua a cada registro um peso relativo: trafego(%) = peso para um recurso específico / soma de todos os pesos para todos os recursos.
+* Os pesos não precisam somar 100.
+* Os registros DNS devem ter o mesmo nome e tipo.
+* Pode ser associado com heath checks.
+* Casos de uso: balanceamento de carga entre regiões, testes de novas versões de aplicativos, …
+* Atribua um peso de 0 a um registro para interromper o envio de tráfego para um recurso. Se todos os registros tiverem peso 0, todos os registros serão
+ser retornados igualmente.
+#### Routing Policies – Latency-based
+* Redirecionar para o recurso que tem a menor latência perto de nós.
+* Super útil quando a latência para os usuários é a prioridade.
+* A latência é baseada no tráfego entre usuários e as regiões da AWS.
+* Pode ser associado à health checks (tem uma capacidade de failover).
+#### Routing Policies – Failover (Active-Passive)
+* Tendo um health check mandatorio.
+* Quando o health check falha, ele redireciona para outra instancia de redundancia (Disaster Recovery).
+#### Routing Policies – Geolocation
+* Diferente do Latency-based, este roteamento é baseado na localização do usuário.
+* Especifica a localização por continente, país ou por estado dos EUA (se houver sobreposição, local mais preciso será selecionado).
+* Deve criar um registro “default” (em caso não haja correspondência no local).
+* Caso de uso: localização do site, restringir distribuição de conteúdo, balanceamento de carga, …
+* Pode ser associado a verificações de integridade.
+#### Routing Policies – Geoproximity
+* Encaminha o tráfego para seus recursos com base na localização geográfica dos usuários e recursos.
+* Capacidade de transferir mais tráfego para recursos com base no bias definido.
+* Para alterar o tamanho da região geográfica, especifique valores de bias: Para expandir (1 a 99), mais tráfego para o recurso.Para diminuir (-1 a -99), menos tráfego para o recurso.
+* Os recursos podem ser: Recursos da AWS (especifique a região da AWS) e Recursos que não são da AWS (especifique Latitude e Longitude).
+* Será necessario usar o Route 53 Traffic Flow para utilziar essa funcionalidade.
+#### Routing Policies – Multi-Value
+* Usada para rotear o tráfego para vários recursos.
+* O Route 53 retorna vários valores por recursos.
+* Pode ser associado a verificações de integridade (retorna apenas valores para recursos íntegros).
+* Até 8 registros íntegros são retornados para cada consulta de Multi-Value.
+* O Multi-Value não substitui o ELB.
+### Health Checks
+* Os Health Checks de HTTP são apenas para recursos públicos. Sendo que o health check serve para Failover automatizado de DNS.
+ * Health Checks que monitoram um endpoint (aplicativo, servidor, outro recurso da AWS).
+ * Health checks que monitoram outro health checks (Calculated Health Checks).
+ * Health checks que monitoram CloudWatch Alarms. Por exemplo, throttles of DynamoDB, alarms on RDS, custom metrics, … (útil para private resources).
+* Health Checks são integrados com o Cloud Watch metrics.
+#### Monitora um Endpoint (Monitor an Endpoint)
+* Cerca de 15 health checks globais irão verificar o integridade do endpoint.
+ * Healthy/Unhealthy Threshold: 3 (default).
+ * Interval: 30 segundos (pode ser definido para 10 segundos, custo mais alto).
+ * Protocolo suportado: HTTP, HTTPS e TCP.
+ * Se mais de 18% dos verificadores de integridade relatarem que o endpoint é Healthy, a Route 53 a considera Saudável. Caso contrário, é Unhealthy.
+* As verificações de integridade são aprovadas somente quando o endpoint responde com os códigos de status 2xx e 3xx.
+* As verificações de integridade podem ser configuradas para passar/reprovar com base em nos primeiros 5120 bytes do texto da resposta.
+* Será necesario configurar o roteador/firewall para permitir solicitações do Route 53 Health Checkers.
+#### Calculated Health Checks
+* Combine os resultados de vários Health Checks em um único Health Check.
+* É possivel usar as operações lógicas *OR*, *AND* ou *NOT*.
+* Pode monitoras mais de 256 Health Checks filhos.
+* Especifica quantas verificações de integridade precisam passar para fazer o pai passar.
+* Caso de uso: faça a manutenção do seu site sem causar falhas em todas as verificações de integridade.
+#### Private Hosted Zones
+* Os verificadores de integridade da Route 53 estão fora do VPC. Eles não podem acessar endpoints privados (VPC privada ou recursos on-premises).
+* É possivel criar uma métrica do CloudWatch e associar um alarme do CloudWatch e, em seguida, criar um Health Check que verifica o alarme em si.
+### Route 53 - Traffic flow
+* Simplifique o processo de criação e manutenção de registros de configurações grandes e complexas.
+* Editor visual para gerenciar complexas árvores de decisão de roteamento.
+* As configurações podem ser salvas como Traffic Flow Policy. Pode ser aplicado a Route 53 Hosted Zones (diferentes nomes de domínio) e suporta versionamento.
+## Domain Registar vs. DNS Service
+* Você compra ou registra seu nome de domínio com um registrador de domínio (Domain Registar) normalmente pagando taxas anuais (por exemplo, GoDaddy, Amazon Registrar Inc., …).
+* O registrador de domínio geralmente fornece um serviço de DNS para gerenciar seus registros DNS, mas você pode usar outro serviço DNS para gerenciar seus registros DNS. Exemplo: um domínio do GoDaddy comprado, mas Route 53 sendo utilizado para gerenciar seus registros DNS
+### 3rd Party Registrar with Amazon Route 53
+* Se você comprar seu domínio em um registrador de terceiros, ainda poderá usar o Route 53 como provedor de serviço DNS.
+ * Crie uma zona hospedada no Route 53.
+ * Atualize os registros NS no site de terceiros para usar os servidores de nomes do Route 53.
+* Domain Registrar é diferente de serviço de DNS, mas cada registrador de domínio geralmente vem com alguns recursos de DNS.

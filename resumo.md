@@ -520,3 +520,33 @@ ser retornados igualmente.
  * Crie uma zona hospedada no Route 53.
  * Atualize os registros NS no site de terceiros para usar os servidores de nomes do Route 53.
 * Domain Registrar é diferente de serviço de DNS, mas cada registrador de domínio geralmente vem com alguns recursos de DNS.
+## Virtual Private Cloud (VPC)
+* VPC: rede privada para implantar os recursos (recurso regional).
+* Subnets: As sub-redes permitem particionar sua rede dentro de sua VPC (recurso de zona de disponibilidade).
+* Public Subnets: Uma sub-rede pública é uma sub-rede que é acessível pela internet.
+* Private Subnet: Uma sub-rede privada é uma sub-rede que não é acessível pela internet.
+* Para definir o acesso à Internet e entre sub-redes, usamos tabelas de rotas (Route Tables).
+* Internet Gateways: ajudam nossas instâncias de VPC a se conectarem à Internet. As sub-redes públicas têm uma rota para o gateway de internet.
+* NAT Gateways (gerenciados pela AWS) e NAT instances (autogerenciadas) permitem suas instâncias em suas sub-redes privadas acessar a internet enquanto permanece privado.
+* NACL (Network ACL): Um firewall que controla o tráfego de e para sub-rede, tem regras para PERMITIR (Allow) e NEGAR (Deny) e estão anexados no nível de sub-rede. As regras incluem apenas endereços IP.
+* Security Groups: Um firewall que controla o tráfego de e para um ENI/uma instância EC2, sendo que tem apenas regras para PERMITIR (Allow). As regras incluem endereços IP e outros security groups.
+* Site to Site VPN: Conecte uma VPN local à AWS. A conexão é criptografada automaticamente e passa pela internet pública.
+* Direct Connect: Conexão privada direta com a AWS. Estabeleça uma conexão física entre o local e a AWS. A conexão é privada, segura e rápida. Passa por uma rede privada e leva pelo menos um mês para estabelecer.
+### VPC Flow Logs
+* Capture informações sobre o tráfego IP que entra em suas interfaces:
+ * VPC Flow Logs
+ * Subnet Flow Logs
+ * Elastic Network Interface Flow Logs
+* Ajuda a monitorar e solucionar problemas de conectividade. Exemplo: Sub-redes para internet, Sub-redes para sub-redes e Internet para sub-redes.
+* Também captura informações de rede de interfaces gerenciadas pela AWS: Elastic Load Balancers, ElastiCache, RDS, Aurora, etc…
+* Os dados do VPC Flow Logs podem ir para S3/CloudWatch Logs.
+### VPC Peering
+* Conecta duas VPCs de forma privada usando a rede AWS e faz com que se comportem como se fossem a mesma rede.
+* Não deve ter sobreposição de CIDR (IP address range)
+* A conexão de emparelhamento de VPC (VPC Peering) não é transitiva (deve ser estabelecida para cada VPC que precisa se comunicar uma com a outra).
+### VPC Endpoints
+* Os endpoints permitem que você se conecte à serviços da AWS usando uma rede privada em vez da rede pública www.
+* Isso oferece segurança aprimorada e menor latência para acessar os serviços da AWS.
+* VPC Endpoint Gateway para S3 e DynamoDB.
+* VPC Endpoint Interface para o resto.
+* Apenas usado em sua VPC.

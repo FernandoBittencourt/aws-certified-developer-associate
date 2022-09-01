@@ -550,3 +550,64 @@ ser retornados igualmente.
 * VPC Endpoint Gateway para S3 e DynamoDB.
 * VPC Endpoint Interface para o resto.
 * Apenas usado em sua VPC.
+## S3
+* Amazon S3 é um dos principais blocos de construção (building blocks) da AWS. É anunciado como armazenamento de "escala infinita". 
+* Muitos sites usam o S3 como "backbone" e muitos dos serviços da aws tem integração com ele.
+### Bucket
+* O Amazon S3 permite que as pessoas armazenem objects (arquivos) em “buckets” (diretórios). 
+* Os buckets são definidos no nível da região.
+* Os buckets devem ter um nome globalmente exclusivo, ou seja, o nome escolhido deve ser único.
+### Objects
+* Objects (arquivos) têm uma key. A chave é o caminho completo, sendo composta por prefixo + nome do objeto. Por exemplo: s3://my-bucket/my_folder1/another_folder/my_file.txt.
+* Não há conceito de “diretórios” dentro de buckets. Apenas chaves com nomes muito longos que contêm barras (“/”)
+* Os valores do objeto (Object values) são o conteúdo do corpo (body): O tamanho máximo do objeto é 5 TB (5000 GB) e se carregar mais de 5 GB, deve usar o "multi-part upload".
+* Metadata: lista de pares de chave e valor de texto (metadados do sistema ou do usuário).
+* Tags: Par de chave e valor Unicode, até 10 elementos, útil para segurança e ciclo de vida.
+* Version ID (se o versionamento estiver habilitado).
+### Versioning
+* É possível versionar os arquivos no Amazon S3, isso é ativado no nível do bucket.
+* A mesma substituição de chave incrementará a “versão”.
+* Qualquer arquivo que não seja versionado antes de habilitar o versionamento terá a versão “null” e suspender o controle de versão não exclui as versões anteriores.
+### S3 Encryption for Objects
+* Existem 4 métodos de criptografar objetos no S3:
+ * SSE-S3: criptografa objetos do S3 usando chaves controladas e gerenciadas pela AWS.
+  * O objeto é criptografado no lado do servidor.
+  * AES-256 encryption type.
+  * Deve incluir no header: *"x-amz-server-side-encryption": "AES256"*.
+ * SSE-KMS: aproveita o AWS Key Management Service para gerenciar chaves de criptografia.
+  * Vantagens do KMS: controle do usuário + trilha de auditoria.
+  * O objeto é criptografado no lado do servidor.
+  * Deve incluir no header: *"x-amz-server-side-encryption": "aws:kms"*.
+ * SSE-C: criptografia do lado do servidor usando chaves de dados totalmente gerenciadas pelo cliente fora da AWS
+  * O Amazon S3 não armazena a chave de criptografia que você fornece.
+  * HTTPS deve ser usado.
+  * A chave de criptografia deve ser fornecida nos cabeçalhos HTTP, para cada solicitação HTTP feita.
+ * Client Side Encryption.
+  * Biblioteca de cliente, como o Amazon S3 Encryption Client.
+  * Os próprios clientes devem criptografar os dados antes de enviar para o S3.
+  * Os clientes devem descriptografar os dados ao recuperar do S3.
+  * O cliente gerencia totalmente as chaves e o ciclo de criptografia.
+### Encryption in transit (SSL/TLS)
+* Amazon S3 expõe:
+ * Endpoint HTTP: não criptografado.
+ * Endpoint HTTPS: criptografia "n flight".
+* Você pode usar o endpoint que quiser, mas o HTTPS é recomendado. Sendo a maioria dos clientes usam o endpoint HTTPS por padrão.
+* HTTPS é obrigatório para SSE-C.
+* A criptografia "in flight" também é chamada de SSL/TLS.
+### S3 Security
+* User based
+ * IAM policies: quais chamadas de API devem ser permitidas para um usuário específico do IAM.
+ * IAM principal pode acessar um objeto do S3 se as permissões do IAM do usuário permitem *OU* a política de recursos *PERMITE* e não há *NEGAÇÃO* explícita.
+* Resource Based
+ * Bucket Policies: regras para todo o bucket do console S3, permitem "cross account".
+ * Object Access Control List (ACL): Maior granularidade.
+ * Bucket Access Control List (ACL): Menos comum.
+* Networking: Suporta VPC Endpoints (para instâncias na VPC sem acesso ao www internet).
+* Logging and Audit: Os logs de acesso do S3 podem ser armazenados em outro bucket do S3. As chamadas de API podem ser registradas no AWS CloudTrail.
+* User Security: MFA (autenticação multifator) pode ser necessária em versões do buckets para excluir objetos. URLs válidos apenas por tempo limitado (Pre-Signed URLs).
+### S3 Websites
+* O S3 pode hospedar sites estáticos e acessíveis pela internet. Tendo a url: <bucket-name>.s3-website-<AWS-region>.amazonaws.com.
+* Se você receber um erro 403 (Forbidden), verifique se a política de bucket permite leitura pública.
+### Cross-Origin Resource Sharing (CORS)
+* É um mecanismo baseado em navegador da Web para permitir solicitações para outras origens ao visitar a origem principal.
+* Uma origin é um schema (protocolo), host (domínio) e porta.

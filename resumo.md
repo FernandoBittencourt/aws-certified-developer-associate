@@ -611,3 +611,9 @@ ser retornados igualmente.
 ### Cross-Origin Resource Sharing (CORS)
 * É um mecanismo baseado em navegador da Web para permitir solicitações para outras origens ao visitar a origem principal.
 * Uma origin é um schema (protocolo), host (domínio) e porta.
+* Mesma origem: http://example.com/app1 & http://example.com/app2.
+* Diferentes origens: http://www.example.com e http://other.example.com.
+* As solicitações não serão atendidas a menos que a outra origem permita as solicitações, usando cabeçalhos CORS (ex: Access-Control-Allow-Origin).
+#### S3 CORS
+* Se um cliente fizer uma solicitação de cross-origin em nosso bucket do S3, precisamos habilitar os cabeçalhos CORS corretos.
+* Você pode permitir uma origem específica ou todas as origens.

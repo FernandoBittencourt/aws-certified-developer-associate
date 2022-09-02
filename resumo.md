@@ -617,3 +617,69 @@ ser retornados igualmente.
 #### S3 CORS
 * Se um cliente fizer uma solicitação de cross-origin em nosso bucket do S3, precisamos habilitar os cabeçalhos CORS corretos.
 * Você pode permitir uma origem específica ou todas as origens.
+### S3 MFA-Delete
+* MFA (autenticação multifator) força o usuário a gerar um código em um dispositivo (geralmente um celular ou hardware) antes de fazer operações importantes no S3.
+* Somente o proprietário do bucket (root account) pode ativar/desativar MFA-Delete.
+* MFA-Delete atualmente só pode ser habilitado usando a CLI.
+* É necessario utilizar o MFA para excluir permanentemente uma versão do objeto e suspender o versionamento no bucket.
+* Não é necessario o MFA para habilitar o controle de versão e listar versões excluídas.
+### S3 Default Encryption vs Bucket Policies
+* Uma maneira de “forçar a criptografia” é usar uma política de bucket e recusar qualquer chamada de API com método PUT contendo um objeto S3 sem cabeçalhos de criptografia.
+* Outra maneira é usar a opção criptografia padrão no S3.
+### S3 Replication
+* É necessario habilitar o controle de versão na origem e no destino.
+* Os buckets podem estar em contas diferentes e a cópia é assíncrona.
+* Existem dois tipos: Cross Region Replication (CRR) e Same Region Replication (SRR).
+* Deve dar as permissões adequadas do IAM ao S3.
+* Após a ativação, apenas novos objetos são replicados. Opcionalmente, você pode replicar objetos existentes usando o S3 Batch Replication, que replica objetos existentes e objetos que falharam na replicação.
+* Não há “encadeamento” de replicação: Se o bucket 1 tiver replicação no bucket 2, que tem replicação no bucket 3. Então, os objetos criados no bucket 1 não são replicados no bucket 3.
+* Para operações DELETE: Pode replicar marcadores de exclusão da origem para o destino (configuração opcional). As exclusões com um version ID não são replicadas (para evitar exclusões maliciosas).
+### S3 Pre-Signed URLs
+* Pode gerar URLs pré-assinados usando SDK ou CLI: Para downloads, pode usar a CLI facilmente. Já para uploads, deve-se usar o SDK, oque é um pouco mais dificil.
+* Válido por um padrão de 3600 segundos, pode alterar o tempo limite com o argumento --expires-in [TIME_BY_SECONDS].
+* Os usuários que recebem um URL pré-assinado herdam as permissões da pessoa que gerou o URL para GET/PUT.
+### S3 Durability and Availability
+* Durabilidade:
+ * Alta durabilidade (99,999999999%) de objetos em várias AZ.
+ * Se você armazenar 10.000.000 objetos com o Amazon S3, poderá esperar, em média, incorrer na perda de um único objeto uma vez a cada 10.000 anos.
+ * A regra é a mesma para todas as classes de armazenamento (Storage Classes).
+* Disponibilidade:
+ * Varia dependendo da classe de armazenamento (Storage Classes).
+ * Exemplo: o padrão S3 tem 99,99% de disponibilidade, ou seja, não disponível 53 minutos por ano.
+### S3 Storage Classes
+* Pode alternar entre as classes manualmente ou usando as configurações do S3 Lifecycle.
+* Amazon S3 Standard - General Purpose.
+ * 99.99% de disponibilidade.
+ * Baixa latência e alta taxa de transferência (throughput).
+ * Usado para dados acessados com frequência. 
+ * Sustenta 2 falhas de instalação simultâneas.
+* Amazon S3 Standard-Infrequent Access (IA).
+ * Para dados acessados com menos frequência, mas que exigem acesso rápido quando necessário.
+ * Custo menor que o S3 Standard.
+ * 99.9% de disponibilidade.
+* Amazon S3 One Zone-Infrequent Access
+ * Para dados acessados com menos frequência, mas que exigem acesso rápido quando necessário.
+ * Custo menor que o S3 Standard.
+ * Alta durabilidade (99,999999999%) em uma única AZ, mas os dados são perdidos se o AZ for destruída.
+ * 99.5% de disponibilidade.
+* Amazon S3 Glacier Instant Retrieval
+ * Armazenamento de objetos de baixo custo destinado a arquivamento/backup. Preços: preço de armazenamento + custo de recuperação do objeto.
+ * Recuperação em milissegundos, ótima para dados acessados uma vez por trimestre.
+ * Duração mínima de armazenamento de 90 dias.
+* Amazon S3 Glacier Flexible Retrieval
+ * Armazenamento de objetos de baixo custo destinado a arquivamento/backup. Preços: preço de armazenamento + custo de recuperação do objeto.
+ * Expedited (1 a 5 minutos), Standard (3 a 5 horas), Bulk (5 a 12 horas) – grátis.
+ * Duração mínima de armazenamento de 90 dias.
+* Amazon S3 Glacier Deep Archive
+ * Armazenamento de objetos de baixo custo destinado a arquivamento/backup. Preços: preço de armazenamento + custo de recuperação do objeto.
+ * Standard (12 horas), Bulk (48 horas).
+ * Minimum storage duration of 180 days.
+* Amazon S3 Intelligent Tiering
+ * Pequeno monitoramento mensal e taxa de classificação automática.
+ * Move objetos automaticamente entre níveis de acesso com base no uso.
+ * Não há cobranças de recuperação no S3 Intelligent-Tiering.
+  * Frequent Access tier (automatico): default tier.
+  * Infrequent Access tier (automatico): objetos não acessados por 30 dias.
+  * Archive Instant Access tier (automatico): objetos não acessados por 90 dias.
+  * Archive Access tier (opcional): configurável por 90 dias até 700+ dias.
+  * Deep Archive Access tier (opcional): configurável por 180 dias até 700+ dias.

@@ -691,3 +691,57 @@ ser retornados igualmente.
 * Usa a linguagem SQL padrão para consultar os arquivos.
 * Suporta CSV, JSON, ORC, Avro e Parquet (construído no Presto).
 * Preço: US$ 5,00 por TB de dados verificados. Se usar dados compactados ou colunares gera economia de custos (menos varredura).
+## AWS CloudFront
+* Cloudfront é um Content Delivery Network (CDN). 
+* É possível melhorar o desempenho de leitura com o conteúdo armazenado em cache nos edge locations. Existem 216 pontos de presença global (edge locations).
+* Tem Proteção DDoS, integração com Shield, AWS Web Application Firewall
+* Pode expor HTTPS externo e comunicar com backends HTTPS internos.
+### CloudFront – Origins
+* S3 bucket: Usado para distribuir arquivos e armazená-los em cache na edge location. Tem segurança aprimorada com o CloudFront Origin Access Identity (OAI). O CloudFront pode ser usado como uma entrada (para fazer upload de arquivos para o S3).
+* Custom Origin (HTTP): Application Load Balancer, Instância do EC2, Site no S3 (primeiro deve habilitar o bucket como um site S3 estático), qualquer backend HTTP desejado.
+### CloudFront Geo Restriction
+* Você pode restringir quem pode acessar sua distribuição. Whitelist: permita que seus usuários acessem seu conteúdo somente se estiverem em um dos países numa lista de países aprovados. Blacklist: impeça que seus usuários acessem seu conteúdo se estiverem em um dos países em uma lista de países proibidos.
+* O “país” é determinado usando um banco de dados Geo-IP de terceiros.
+* Caso de uso: Leis de direitos autorais para controlar o acesso ao conteúdo.
+### CloudFront vs S3 Cross Region Replication
+* CloudFront:
+ * Global Edge network.
+ * Arquivos cacheados com um TTL.
+ * Ótimo para conteúdo estático que deve estar disponível em todos os lugares.
+* S3 Cross Region Replication:
+ * Deve ser configurado para cada região em que você deseja que a replicação aconteça.
+ * Os arquivos são atualizados quase em tempo real.
+ * Somente leitura.
+ * Ótimo para conteúdo dinâmico que precisa estar disponível com baixa latência em algumas regiões.
+### CloudFront Caching
+* Cache baseado no Headers, Session Cookies e Query String Parameters.
+* O cache fica em cada CloudFront Edge Location.
+* É desejavel maximizar a taxa de acerto do cache (cache hit) para minimizar os pedidos na origem.
+* É possivel controlar o TTL (de 0 segundos até 1 ano), pode ser marcado por origem usando o Cache-Control header, Expires header, …
+* É possivel invalidar parte do cache usando a API CreateInvalidation.
+### CloudFront Signed URL / Signed Cookies
+* Útil para distribuir conteúdo exclusivo/premium para usuários por todo o mundo. Para restringir o acesso do visualizador, podemos criar um URL assinada ou cookie assinado do CloudFront.
+* Signed URL: acesso a arquivos individuais (um URL assinado por arquivo).
+* Signed Cookies: acesso a vários arquivos (um cookie assinado para muitos arquivos).
+### CloudFront Signed URL vs S3 Pre-Signed URL
+* CloudFront Signed URL:
+ * Permite acesso a um path, não importa a origem.
+ * Par de chaves de toda a conta, apenas o root pode gerenciá-lo.
+ * Pode filtrar por IP, caminho, data, validade.
+ * Pode aproveitar os recursos de cache.
+* S3 Pre-Signed URL:
+ * Emite um request como a pessoa que pré-assinou o URL.
+ * Usa a chave do IAM como IAM principal da assinatura.
+ * Tempo de vida limitado.
+ ### Multiple Origin
+ * Serve para rotear para diferentes tipos de origens com base no tipo de conteúdo.
+ * Based on path pattern:"/images/*","/api/*","/*".
+ ### Origin Groups
+ * Serve para aumentar a alta disponibilidade e fazer failover.
+ * Origin Group: uma origem primária e uma secundária. Se a origem primária falhar, a segunda é usada.
+### Field Level Encryption
+* Proteja as informações confidenciais do usuário por meio da pilha de aplicativos.
+* Adiciona uma camada adicional de segurança junto com HTTPS.
+* Informações confidenciais criptografadas na edge location perto do usuário.
+* Usa criptografia assimétrica.
+

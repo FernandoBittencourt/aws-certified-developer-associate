@@ -683,3 +683,11 @@ ser retornados igualmente.
   * Archive Instant Access tier (automatico): objetos não acessados por 90 dias.
   * Archive Access tier (opcional): configurável por 90 dias até 700+ dias.
   * Deep Archive Access tier (opcional): configurável por 180 dias até 700+ dias.
+### Select & Glacier Select
+* Recupere menos dados usando SQL executando a filtragem do lado do servidor. Resultando em menos transferência de rede e menos custo de CPU do lado do cliente.
+* É possível filtrar por linhas e colunas, com instruções SQL simples.
+## Amazon Athena
+* Serviço de consulta sem servidor (Serverless) para realizar análises em objetos do S3.
+* Usa a linguagem SQL padrão para consultar os arquivos.
+* Suporta CSV, JSON, ORC, Avro e Parquet (construído no Presto).
+* Preço: US$ 5,00 por TB de dados verificados. Se usar dados compactados ou colunares gera economia de custos (menos varredura).

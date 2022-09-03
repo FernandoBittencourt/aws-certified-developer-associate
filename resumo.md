@@ -744,4 +744,58 @@ ser retornados igualmente.
 * Adiciona uma camada adicional de segurança junto com HTTPS.
 * Informações confidenciais criptografadas na edge location perto do usuário.
 * Usa criptografia assimétrica.
-
+## Docker
+* Docker é uma plataforma de desenvolvimento de software para implantar aplicativos.
+* Os aplicativos são empacotados em contêineres que podem ser executados em qualquer sistema operacional.
+* Os aplicativos são executados da mesma forma, independentemente de onde são executados.
+* As imagens do Docker (Docker images) são armazenadas nos repositórios do Docker (Docker Repositories).
+* Docker Hub: é um Docker Repository que é público e é possivel encontrar as imagens base para diferentes tecnologias e sistemas operacionais.
+* Amazon ECR (Amazon Elastic Container Registry): Pode ser usado como repositório privado ou público (Amazon ECR Public Gallery).
+* O Docker é um tipo de virtualização, mas não extamente, pois os recursos são compartilhados com o host (muitos containers com um unico server).
+## Elastic Container Service (ECS)
+* A própria plataforma de contêineres docker da Amazon.
+* Inicia os contêineres do Docker na AWS. Inicia ECS tasks em clusters do ECS.
+* EC2 Launch Type: Deve provisionar e manter a infraestrutura (as instâncias do EC2).
+* Cada instância do EC2 deve executar o ECS Agent para se registrar no cluster do ECS.
+* AWS cuida de iniciar/parar os containers.
+### ECS – Fargate Launch Type
+* A própria plataforma de contêineres serverless da Amazon. Funciona com ECS e com EKS.
+* Inicia os contêineres do Docker na AWS.
+* Você não provisiona a infraestrutura (sem instâncias EC2 para gerenciar).
+* Só é necessario criar as task definitions. A AWS apenas executa as tarefas do ECS para você com base na CPU e RAM que você precisa.
+* Para dimensionar, basta aumentar o número de tarefas (tasks). Não há mais instâncias do EC2.
+### IAM Roles for ECS
+* EC2 Instance Profile (EC2 Launch Type):
+ * Usado pelo ECS agent.
+ * Faz chamadas para a API do ECS Service.
+ * Envia logs para o Cloudwatch.
+ * Realiza o pull das Docker image no ECR.
+ * Referencia dados sensiveis no Secrets Manager ou SSM Parameter Store.
+* ECS Task Role:
+ * Permite que cada task tenha um "role" específico.
+ * Use diferentes  roles para os diferentes serviços do ECS você roda.
+ * O task role é definido na task definition.
+### Load Balancer Integrations
+* Suporta o Application Load Balancer e funciona para a maioria dos casos de uso.
+* Network Load Balancer é recomendado apenas para casos de uso de alto rendimento/alto desempenho ou para emparelhá-lo com o AWS Private Link.
+* Elastic Load Balancer é compatível, mas não recomendado (sem recursos avançados, sem Fargate).
+### Data Volumes (EFS)
+* Monte sistemas de arquivos EFS em ECS tasks.
+* Funciona com EC2 e Fargate launch types.
+* As tarefas executadas em qualquer AZ compartilharão os mesmos dados no sistema de arquivos EFS.
+* Fargate + EFS = Serverless.
+* Casos de uso: armazenamento compartilhado multi-AZ persistente para seus contêineres.
+### ECS Service Auto Scaling
+* Aumenta e diminue automaticamente o número desejado de tarefas ECS.
+* Amazon ECS Auto Scaling usa o AWS Application Auto Scaling.
+* Target Tracking: Escala com base no valor de targe para uma métrica específica do CloudWatch
+* Step Scaling: Escala com base em um alarme específico do CloudWatch Alarm.
+* Scheduled Scaling: scala com base em uma data/tempo específico (predictable changes).
+* ECS Service Auto Scaling (task level) é diferente do EC2 Auto Scaling (EC2 instance level).
+* Fargate Auto Scaling é muito mais fácil de configurar (porque é Serverless).
+ ### ECS Rolling Updates
+ * Ao atualizar de uma versão para outra, podemos controlar quantas tarefas podem ser iniciadas e interrompidas e em qual ordem.
+ ### Task Definitions
+ * Task Definitions são metadados em formato JSON para informar o ECS como executar um contêiner do Docker.
+ * 
+ 

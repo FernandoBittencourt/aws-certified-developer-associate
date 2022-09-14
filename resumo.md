@@ -827,4 +827,30 @@ ser retornados igualmente.
 * Fargate Tasks( usando ephemeral storage)
  * Os dados estão vinculados ao(s) contêiner(es) que os utilizam
  * 20 GiB – 200 GiB (default 20 GiB)
-### Amazon ECR
+## Amazon ECR (Elastic Container Registry)
+* Armazena e gerencia imagens do Docker na AWS, com repositorios privados e públicos.
+* Totalmente integrado ao ECS, com auxilio do Amazon S3.
+* O acesso é controlado pelo IAM.
+* Suporta varredura de vulnerabilidade de imagem, controle de versão, tags de imagem, ciclo de vida da imagem, …
+## Amazon EKS (Amazon Elastic Kubernetes Service)
+* É uma maneira de usar clusters Kubernetes gerenciados na AWS.
+* Kubernetes é um sistema de código aberto para implantação automática, dimensionamento e gerenciamento de aplicativos em contêiner (geralmente Docker).
+* É uma alternativa ao ECS, com objetivo semelhante, mas API diferente.
+* O EKS oferece suporte ao EC2 se você deseja implantar worker nodes ou Fargate para implantar contêineres serverless.
+* Kubernetes é cloud-agnostic (independente da nuvem).
+* Para várias regiões, implante um cluster EKS por região.
+* Colete logs e métricas usando o CloudWatch Container Insights.
+### Node Types
+* Managed Node Groups
+ * Cria e gerencia nós (instâncias do EC2) para você.
+ * Os nós fazem parte de um ASG gerenciado pelo EKS.
+ * Suporta instâncias sob demanda ou spot.
+* Self-Managed Nodes
+ * Nós criados por você e registrados no cluster EKS e gerenciados por um ASG.
+ * Você pode usar AMI pré-criada - Amazon EKS Optimized AMI.
+ * Suporta instâncias sob demanda ou spot.
+* AWS Fargate
+ * Não requer manutenção; nenhum nó gerenciado.
+### Data Volumes
+* Precisa especificar o StorageClass manifest em seu cluster EKS.
+* Aproveita uma unidade compatível com Container Storage Interface (CSI).

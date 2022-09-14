@@ -797,5 +797,34 @@ ser retornados igualmente.
  * Ao atualizar de uma versão para outra, podemos controlar quantas tarefas podem ser iniciadas e interrompidas e em qual ordem.
  ### Task Definitions
  * Task Definitions são metadados em formato JSON para informar o ECS como executar um contêiner do Docker.
- * 
- 
+ * Contém informações cruciais como:
+ * Image Name
+ * Port Binding for Container and Host
+ * Memory and CPU required
+ * Environment variables
+ * Networking information
+ * IAM Role
+ * Logging configuration (ex CloudWatch)
+* Pode definir até 10 contêineres em uma Task Definition.
+### Amazon ECS – Load Balancing 
+#### EC2 Launch Type
+* Obtemos um mapeamento dinâmico da porta do host (Dynamic Host Port Mapping) se você definir apenas a porta do contêiner na definição da tarefa.
+* O ALB encontra a porta correta no sua instância EC2.
+* Você deve permitir qualquer porta do grupo de segurança do ALB no security group da instância do EC2.
+#### Fargate
+* Cada tarefa tem um IP privado exclusivo.
+* É possivel definir apenas a porta do contêiner (a porta do host não é aplicável).
+### Environment Variables
+* Hardcode: por exemplo, URLs.
+* SSM Parameter Store: variáveis sensíveis (por exemplo, chaves de API, configurações compartilhadas).
+* Secrets Manager: variáveis sensíveis (por exemplo, senhas de banco de dados).
+* Environment Files (bulk): Amazon S3
+### Data Volumes (Bind Mounts)
+* Compartilhe dados entre vários containers na mesma task definition.
+* Funciona tanto para EC2, quanto Fargate.
+* EC2 Tasks (usando EC2 instance storage)
+ * Os dados estão vinculados ao ciclo de vida da instância do EC2
+* Fargate Tasks( usando ephemeral storage)
+ * Os dados estão vinculados ao(s) contêiner(es) que os utilizam
+ * 20 GiB – 200 GiB (default 20 GiB)
+### Amazon ECR

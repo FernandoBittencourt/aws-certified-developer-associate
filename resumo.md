@@ -6,7 +6,7 @@
 * Os critérios de escolha de uma região pode ser baseado em compliance, proximidade com o cliente, disponibilidade de serviços e preço.
 ## AWS Availability Zone (AZ)
 * Cada região contém zonas de disponibilidade (AZ) com nomes "ap-southeast-2a","ap=southeast-2b".
-* Contendo normalmente 3 zonas de disponibilidade por região, sendo o mínimo 2 e o máximo 6.
+* Contendo normalmente 3 zonas de disponibilidade por região, sendo o mínimo 3 e o máximo 6.
 * Cada AZ é um ou mais datacenters com redundâncias de energia, rede e conectividade. São separados uns dos outros, isolados de desastres.
 * Eles são conectados, com redes de alta banda e baixa latência.
 ## AWS Identity and Access Management (IAM)
